@@ -5,10 +5,12 @@ import VmDebugger from './vm-debugger/vm-debugger'
 import VmDebuggerHead from './vm-debugger/vm-debugger-head'
 import { TransactionDebugger as Debugger } from '@remix-project/remix-debug'
 import { ModalDialog } from '@remix-ui/modal-dialog'
+import { DebuggerAPI, DebuggerUIProps } from './DebuggerAPI'
 /* eslint-disable-next-line */
 import './debugger-ui.css'
 
-export const DebuggerUI = ({ debuggerModule }) => {
+export const DebuggerUI = (props: DebuggerUIProps) => {
+  const debuggerModule = props.debuggerAPI
   const [state, setState] = useState({
     isActive: false,
     statusMessage: '',
@@ -68,7 +70,7 @@ export const DebuggerUI = ({ debuggerModule }) => {
     if (!debuggerInstance) return
 
     debuggerInstance.event.register('debuggerStatus', async (isActive) => {
-      await debuggerModule.call('editor', 'discardHighlight')
+      await debuggerModule.discardHighlight()
       setState( prevState => {
         return { ...prevState, isActive }
       })
@@ -89,21 +91,21 @@ export const DebuggerUI = ({ debuggerModule }) => {
               path = `browser/.debugger/generated-sources/${source.name}`
               let content
               try {
-                content = await debuggerModule.call('fileManager', 'getFile', path, source.contents)
+                content = await debuggerModule.getFile(path)
               } catch (e) {
                 showMsg('Error', e.message)
                 console.log('unable to fetch generated sources, the file probably doesn\'t exist yet', e)
               }
               if (content !== source.contents) {
-                await debuggerModule.call('fileManager', 'setFile', path, source.contents)
+                await debuggerModule.setFile(path, source.contents)
               }
               break
             }
           }
         }
         if (path) {
-          await debuggerModule.call('editor', 'discardHighlight')
-          await debuggerModule.call('editor', 'highlight', lineColumnPos, path)
+          await debuggerModule.discardHighlight()
+          await debuggerModule.highlight(lineColumnPos, path)
         }
       }
     })
@@ -183,15 +185,15 @@ export const DebuggerUI = ({ debuggerModule }) => {
       unLoad()
     })
   }
-
+  
   const debug = (txHash) => {
     startDebugging(null, txHash, null)
   }
-
+  
   const deleteHighlights = async () => {
     await debuggerModule.call('editor', 'discardHighlight')
   }
-
+  
   const stepManager = {
     jumpTo: state.debugger && state.debugger.step_manager ? state.debugger.step_manager.jumpTo.bind(state.debugger.step_manager) : null,
     stepOverBack: state.debugger && state.debugger.step_manager ? state.debugger.step_manager.stepOverBack.bind(state.debugger.step_manager) : null,
@@ -205,14 +207,20 @@ export const DebuggerUI = ({ debuggerModule }) => {
     traceLength: state.debugger && state.debugger.step_manager ? state.debugger.step_manager.traceLength : null,
     registerEvent: state.debugger && state.debugger.step_manager ? state.debugger.step_manager.event.register.bind(state.debugger.step_manager.event) : null,
   }
+  
   const vmDebugger = {
     registerEvent: state.debugger && state.debugger.vmDebuggerLogic ? state.debugger.vmDebuggerLogic.event.register.bind(state.debugger.vmDebuggerLogic.event) : null,
     triggerEvent: state.debugger && state.debugger.vmDebuggerLogic ? state.debugger.vmDebuggerLogic.event.trigger.bind(state.debugger.vmDebuggerLogic.event) : null
   }
-
+  
+  const deleteHighlights = async () => {
+    await debuggerModule.discardHighlight()
+  }
+  
   const hideModal = () => {
     setState((prevState) => { return { ...prevState, showModal: false } })
   }
+  
   const showMsg = (title, message) => {
     setState((prevState) => { return { ...prevState, showModal: true, modalOpt: { title, message } } })
   }

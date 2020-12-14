@@ -4,7 +4,7 @@ import { basicLogo } from './app/ui/svgLogo'
 import { RunTab, makeUdapp } from './app/udapp'
 
 import PanelsResize from './lib/panels-resize'
-import { Engine } from '@remixproject/engine'
+import { RemixEngine } from './remixEngine'
 import { RemixAppManager } from './remixAppManager'
 import { FramingService } from './framingService'
 import { MainView } from './app/panels/main-view'
@@ -33,7 +33,7 @@ var Storage = remixLib.Storage
 var RemixDProvider = require('./app/files/remixDProvider')
 var Config = require('./config')
 var Renderer = require('./app/ui/renderer')
-var examples = require('./app/editor/example-contracts')
+var examples = require('./app/editor/examples')
 var modalDialogCustom = require('./app/ui/modal-dialog-custom')
 var FileManager = require('./app/files/fileManager')
 var FileProvider = require('./app/files/fileProvider')
@@ -231,17 +231,10 @@ Please make a backup of your contracts and start using http://remix.ethereum.org
   const appManager = self.appManager
   const pluginLoader = appManager.pluginLoader
   const workspace = pluginLoader.get()
-  const engine = new Engine(appManager)
-  engine.setPluginOption = ({ name, kind }) => {
-    if (kind === 'provider') return { queueTimeout: 60000 * 2 }
-    if (name === 'LearnEth') return { queueTimeout: 60000 }
-    return { queueTimeout: 10000 }
-  }
-  await engine.onload()
+  const engine = new RemixEngine()
+  engine.register(appManager)
 
   // SERVICES
-  // ----------------- import content servive ------------------------
-  const contentImport = new CompilerImport()
   // ----------------- theme servive ---------------------------------
   const themeModule = new ThemeModule(registry)
   registry.put({ api: themeModule, name: 'themeModule' })
@@ -259,6 +252,9 @@ Please make a backup of your contracts and start using http://remix.ethereum.org
   // ----------------- fileManager servive ----------------------------
   const fileManager = new FileManager(editor, appManager)
   registry.put({ api: fileManager, name: 'filemanager' })
+
+  // ----------------- import content servive ------------------------
+  const contentImport = new CompilerImport(fileManager)
 
   const blockchain = new Blockchain(registry.get('config').api)
   const pluginUdapp = new PluginUDapp(blockchain)
@@ -318,7 +314,10 @@ Please make a backup of your contracts and start using http://remix.ethereum.org
   const mainview = new MainView(contextualListener, editor, appPanel, fileManager, appManager, terminal)
   registry.put({ api: mainview, name: 'mainview' })
 
-  engine.register(appPanel)
+  engine.register([
+    appPanel,
+    mainview.tabProxy
+  ])
 
   // those views depend on app_manager
   const menuicons = new VerticalIcons(appManager)
@@ -355,7 +354,8 @@ Please make a backup of your contracts and start using http://remix.ethereum.org
     registry.get('config').api,
     new Renderer(),
     registry.get('fileproviders/browser').api,
-    registry.get('filemanager').api
+    registry.get('filemanager').api,
+    contentImport
   )
   const run = new RunTab(
     blockchain,
@@ -380,7 +380,8 @@ Please make a backup of your contracts and start using http://remix.ethereum.org
     filePanel,
     compileTab,
     appManager,
-    new Renderer()
+    new Renderer(),
+    contentImport
   )
 
   engine.register([
@@ -389,7 +390,8 @@ Please make a backup of your contracts and start using http://remix.ethereum.org
     debug,
     analysis,
     test,
-    filePanel.remixdHandle
+    filePanel.remixdHandle,
+    filePanel.gitHandle
   ])
 
   try {
@@ -401,17 +403,17 @@ Please make a backup of your contracts and start using http://remix.ethereum.org
   await appManager.activatePlugin(['contentImport', 'theme', 'editor', 'fileManager', 'compilerMetadata', 'compilerArtefacts', 'network', 'web3Provider', 'offsetToLineColumnConverter'])
   await appManager.activatePlugin(['mainPanel', 'menuicons'])
   await appManager.activatePlugin(['sidePanel']) // activating  host plugin separately
-  await appManager.activatePlugin(['home', 'hiddenPanel', 'pluginManager', 'fileExplorers', 'settings', 'contextualListener', 'scriptRunner', 'terminal', 'fetchAndCompile'])
+  await appManager.activatePlugin(['home', 'hiddenPanel', 'pluginManager', 'fileExplorers', 'settings', 'contextualListener', 'terminal', 'fetchAndCompile'])
 
   const queryParams = new QueryParams()
   const params = queryParams.get()
 
   // Set workspace after initial activation
   if (Array.isArray(workspace)) {
-    appManager.activatePlugin(workspace).then(() => {
+    appManager.activatePlugin(workspace).then(async () => {
       try {
         if (params.deactivate) {
-          appManager.deactivatePlugin(params.deactivate.split(','))
+          await appManager.deactivatePlugin(params.deactivate.split(','))
         }
       } catch (e) {
         console.log(e)
@@ -425,16 +427,13 @@ Please make a backup of your contracts and start using http://remix.ethereum.org
         if (callDetails.length > 1) {
           toolTip(`initiating ${callDetails[0]} ...`)
           // @todo(remove the timeout when activatePlugin is on 0.3.0)
-          setTimeout(() => {
-            appManager.call(...callDetails).catch(console.error)
-          }, 5000)
+          appManager.call(...callDetails).catch(console.error)
         }
       }
     }).catch(console.error)
   } else {
     // activate solidity plugin
-    appManager.ensureActivated('solidity')
-    appManager.ensureActivated('udapp')
+    appManager.activatePlugin(['solidity', 'udapp'])
   }
 
   // Load and start the service who manager layout and frame

@@ -1,5 +1,5 @@
 import { EventEmitter } from 'events'
-import { HostPlugin } from '@remixproject/engine'
+import { HostPlugin } from '@remixproject/engine-web'
 const csjs = require('csjs-inject')
 const yo = require('yo-yo')
 
@@ -13,6 +13,7 @@ const css = csjs`
   }
   .plugItIn > div {
     overflow-y     : auto;
+    overflow-x     : hidden;
     height         : 100%;
     width          : 100%;
   }

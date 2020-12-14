@@ -197,12 +197,15 @@ class CompilerContainer {
       class="custom-select ml-2 ${css.runs}"
       id="runs"
       placeholder="200"
+      value="200"
       type="number"
-      title="Number of optimisation runs."
+      title="Estimated number of times each opcode of the deployed code will be executed across the life-time of the contract."
       onchange=${() => this.onchangeRuns()}
     >`
-    if (this.compileTabLogic.optimize) this._view.runs.removeAttribute('disabled')
-    else {
+    if (this.compileTabLogic.optimize) {
+      this._view.runs.removeAttribute('disabled')
+      this._view.runs.value = this.compileTabLogic.runs
+    } else {
       this._view.runs.setAttribute('disabled', '')
     }
 
@@ -219,7 +222,7 @@ class CompilerContainer {
 
     this._view.evmVersionSelector = yo`
       <select onchange="${this.onchangeEvmVersion.bind(this)}" class="custom-select" id="evmVersionSelector">
-        <option value="default">compiler default</option>
+        <option value="default" selected="selected">compiler default</option>
         <option>istanbul</option>
         <option>petersburg</option>
         <option>constantinople</option>
@@ -241,6 +244,7 @@ class CompilerContainer {
         this.onchangeEvmVersion()
       } else {
         s.selectedIndex = i
+        this.onchangeEvmVersion()
       }
     }
 
@@ -345,7 +349,9 @@ class CompilerContainer {
     this.compileTabLogic.setOptimize(!!this._view.optimize.checked)
     if (this.compileTabLogic.optimize) {
       this._view.runs.removeAttribute('disabled')
+      this.compileTabLogic.setRuns(parseInt(this._view.runs.value))
     } else {
+      this.compileTabLogic.setRuns(200)
       this._view.runs.setAttribute('disabled', '')
     }
     this.compileIfAutoCompileOn()
@@ -368,6 +374,14 @@ class CompilerContainer {
       v = null
     }
     this.compileTabLogic.setEvmVersion(v)
+    for (let i = 0; i < s.options.length; i++) {
+      if (i === s.selectedIndex) {
+        s.options[s.selectedIndex].setAttribute('selected', 'selected')
+      } else {
+        s.options[i].removeAttribute('selected')
+      }
+    }
+
     this.compileIfAutoCompileOn()
   }
 
@@ -428,15 +442,6 @@ class CompilerContainer {
       this.data.selectedVersion = this.data.defaultVersion
     }
     this._view.versionSelector.innerHTML = ''
-    this.data.allversions.forEach(build => {
-      const option = build.path === this.data.selectedVersion
-        ? yo`<option value="${build.path}" selected>${build.longVersion}</option>`
-        : yo`<option value="${build.path}">${build.longVersion}</option>`
-
-      if (this._shouldBeAdded(option.innerText)) {
-        this._view.versionSelector.appendChild(option)
-      }
-    })
     this._view.versionSelector.removeAttribute('disabled')
     this.queryParams.update({ version: this.data.selectedVersion })
     let url
@@ -457,6 +462,16 @@ class CompilerContainer {
       }
       url = `${urlFromVersion(this.data.selectedVersion)}`
     }
+
+    this.data.allversions.forEach(build => {
+      const option = build.path === this.data.selectedVersion
+        ? yo`<option value="${build.path}" selected>${build.longVersion}</option>`
+        : yo`<option value="${build.path}">${build.longVersion}</option>`
+
+      if (this._shouldBeAdded(option.innerText)) {
+        this._view.versionSelector.appendChild(option)
+      }
+    })
 
     // Workers cannot load js on "file:"-URLs and we get a
     // "Uncaught RangeError: Maximum call stack size exceeded" error on Chromium,

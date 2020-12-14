@@ -1,5 +1,5 @@
 import * as packageJson from '../../../../../../package.json'
-import { ViewPlugin } from '@remixproject/engine'
+import { ViewPlugin } from '@remixproject/engine-web'
 
 const yo = require('yo-yo')
 const csjs = require('csjs-inject')
@@ -240,44 +240,27 @@ export class LandingPage extends ViewPlugin {
       })
     }
 
-    const startSolidity = () => {
-      this.appManager.ensureActivated('solidity')
-      this.appManager.ensureActivated('udapp')
-      this.appManager.ensureActivated('solidityStaticAnalysis')
-      this.appManager.ensureActivated('solidityUnitTesting')
+    const startSolidity = async () => {
+      await this.appManager.activatePlugin(['solidity', 'udapp', 'solidityStaticAnalysis', 'solidityUnitTesting'])
       this.verticalIcons.select('solidity')
     }
-    /*
-    const startWorkshop = () => {
-      this.appManager.ensureActivated('box')
-      this.appManager.ensureActivated('solidity')
-      this.appManager.ensureActivated('solidityUnitTesting')
-      this.appManager.ensureActivated('workshops')
-      this.verticalIcons.select('workshops')
-    }
-    */
-
     const startPipeline = () => {
-      this.appManager.ensureActivated('solidity')
-      this.appManager.ensureActivated('pipeline')
-      this.appManager.ensureActivated('udapp')
+      this.appManager.activatePlugin(['solidity', 'pipeline', 'udapp'])
     }
-    const startDebugger = () => {
-      this.appManager.ensureActivated('debugger')
+    const startDebugger = async () => {
+      await this.appManager.activatePlugin('debugger')
       this.verticalIcons.select('debugger')
     }
-    const startMythX = () => {
-      this.appManager.ensureActivated('solidity')
-      this.appManager.ensureActivated('mythx')
+    const startMythX = async () => {
+      await this.appManager.activatePlugin(['solidity', 'mythx'])
       this.verticalIcons.select('mythx')
     }
-    const startSourceVerify = () => {
-      this.appManager.ensureActivated('solidity')
-      this.appManager.ensureActivated('source-verification')
+    const startSourceVerify = async () => {
+      await this.appManager.activatePlugin(['solidity', 'source-verification'])
       this.verticalIcons.select('source-verification')
     }
-    const startPluginManager = () => {
-      this.appManager.ensureActivated('pluginManager')
+    const startPluginManager = async () => {
+      await this.appManager.activatePlugin('pluginManager')
       this.verticalIcons.select('pluginManager')
     }
 
@@ -286,7 +269,7 @@ export class LandingPage extends ViewPlugin {
       fileExplorer.createNewFile()
     }
     const connectToLocalhost = () => {
-      this.appManager.ensureActivated('remixd')
+      this.appManager.activatePlugin('remixd')
     }
     const importFromGist = () => {
       this.gistHandler.loadFromGist({ gist: '' }, globalRegistry.get('filemanager').api)
@@ -424,7 +407,7 @@ export class LandingPage extends ViewPlugin {
               </div><!-- end of hpSections -->
             </div>
             <div class="d-flex flex-column ${css.rightPanel}">
-              <div class="d-flex pr-2 py-2 align-self-end"  id="remixIDEMediaPanelsTitle">
+              <div class="d-flex pr-3 py-2 align-self-end"  id="remixIDEMediaPanelsTitle">
                 ${this.badgeTwitter}
                 ${this.badgeMedium}
               </div>

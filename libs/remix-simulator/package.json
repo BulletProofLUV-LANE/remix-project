@@ -12,7 +12,7 @@
       "email": "yann@ethdev.com"
     }
   ],
-  "main": "index.js",
+  "main": "src/index.js",
   "dependencies": {
     "@remix-project/remix-lib": "^0.4.31",
     "ansi-gray": "^0.1.1",
@@ -43,7 +43,7 @@
     "mocha": "^5.2.0"
   },
   "scripts": {
-    "test": "./../../node_modules/.bin/mocha --require tsconfig-paths/register test/"
+    "test": "./../../node_modules/.bin/ts-node --require tsconfig-paths/register ./../../node_modules/.bin/mocha test/*.ts"
   },
   "publishConfig": {
     "access": "public"
@@ -56,7 +56,7 @@
     "type": "git",
     "url": "git+https://github.com/ethereum/remix-project.git"
   },
-  "author": "remix team",
+  "author": "Remix Team",
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/ethereum/remix-project/issues"

@@ -1,5 +1,5 @@
 /* global */
-import { ViewPlugin } from '@remixproject/engine'
+import { ViewPlugin } from '@remixproject/engine-web'
 import * as packageJson from '../../../../../package.json'
 import publishToStorage from '../../publishToStorage'
 import { compile } from '../compiler/compiler-helpers'
@@ -41,7 +41,7 @@ const profile = {
 // - methods: ['getCompilationResult']
 
 class CompileTab extends ViewPlugin {
-  constructor (editor, config, renderer, fileProvider, fileManager) {
+  constructor (editor, config, renderer, fileProvider, fileManager, contentImport) {
     super(profile)
     this.events = new EventEmitter()
     this._view = {
@@ -50,6 +50,7 @@ class CompileTab extends ViewPlugin {
       errorContainer: null,
       contractEl: null
     }
+    this.contentImport = contentImport
     this.queryParams = new QueryParams()
     this.fileProvider = fileProvider
     // dependencies
@@ -66,7 +67,7 @@ class CompileTab extends ViewPlugin {
   }
 
   onActivationInternal () {
-    this.compileTabLogic = new CompileTabLogic(this.queryParams, this.fileManager, this.editor, this.config, this.fileProvider)
+    this.compileTabLogic = new CompileTabLogic(this.queryParams, this.fileManager, this.editor, this.config, this.fileProvider, this.contentImport)
     this.compiler = this.compileTabLogic.compiler
     this.compileTabLogic.init()
 

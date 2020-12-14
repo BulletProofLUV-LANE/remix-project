@@ -26,7 +26,7 @@ module.exports = {
     browser
     .waitForElementVisible('*[data-id="remixIdeIconPanel"]', 10000)
     .clickLaunchIcon('fileExplorers')
-    .rightClick('[data-path="browser/1_Storage.sol"]')
+    .rightClick('[data-path="browser/README.txt"]')
     .click('*[id="menuitemcreate folder"]')
     .waitForElementVisible('*[data-id="modalDialogContainer"]')
     .setValue('*[data-id="modalDialogCustomPromptText"]', 'Browser_Tests')
@@ -48,7 +48,9 @@ module.exports = {
           .modalFooterCancelClick()
           .executeScript(`remix.loadgist('${gistid}')`)
           .perform((done) => { if (runtimeBrowser === 'chrome') { browser.openFile('browser/gists') } done() })
-          .openFile(`browser/gists/${gistid}/1_Storage.sol`)
+          .waitForElementVisible(`li[key="browser/gists/${gistid}"]`)
+          .click(`li[key="browser/gists/${gistid}"]`)
+          .openFile(`browser/gists/${gistid}/README.txt`)
           .perform(done)
       }
     })

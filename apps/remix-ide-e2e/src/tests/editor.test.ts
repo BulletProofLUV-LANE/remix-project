@@ -12,7 +12,10 @@ module.exports = {
 
   'Should zoom in editor': function (browser: NightwatchBrowser) {
     browser.waitForElementVisible('div[data-id="mainPanelPluginsContainer"]')
-    .openFile('browser/1_Storage.sol')
+    .clickLaunchIcon('fileExplorers')
+    .waitForElementVisible('div[data-id="filePanelFileExplorerTree"]')
+    .click('*[data-id="treeViewLibrowser/contracts"]')
+    .openFile('browser/contracts/1_Storage.sol')
     .waitForElementVisible('*[data-id="editorInput"]')
     .checkElementStyle('*[data-id="editorInput"]', 'font-size', '12px')
     .click('*[data-id="tabProxyZoomIn"]')
@@ -97,9 +100,11 @@ module.exports = {
     .click('li[key="browser/removeSourcehighlightScript.js"]')
     .pause(2000)
     .executeScript('remix.exeCurrent()')
-    .waitForElementVisible('li[key="browser/3_Ballot.sol"]')
-    .click('li[key="browser/3_Ballot.sol"]')
-    .pause(2000)
+    .waitForElementVisible('li[key="browser/contracts"]')
+    .click('li[key="browser/contracts"]') // files don't appear, so we click twice to get the files
+    .click('li[key="browser/contracts"]')
+    .waitForElementVisible('li[key="browser/contracts/3_Ballot.sol"]')
+    .click('li[key="browser/contracts/3_Ballot.sol"]')
     .waitForElementNotPresent('.highlightLine32')
     .checkElementStyle('.highlightLine40', 'background-color', 'rgb(8, 108, 181)')
     .checkElementStyle('.highlightLine50', 'background-color', 'rgb(8, 108, 181)')
@@ -110,8 +115,8 @@ module.exports = {
     .click('li[key="browser/removeAllSourcehighlightScript.js"]')
     .pause(2000)
     .executeScript('remix.exeCurrent()')
-    .waitForElementVisible('li[key="browser/3_Ballot.sol"]')
-    .click('li[key="browser/3_Ballot.sol"]')
+    .waitForElementVisible('li[key="browser/contracts/3_Ballot.sol"]')
+    .click('li[key="browser/contracts/3_Ballot.sol"]')
     .pause(2000)
     .waitForElementNotPresent('.highlightLine32')
     .waitForElementNotPresent('.highlightLine40')
@@ -151,7 +156,7 @@ const sourcehighlightScript = {
                 column: 20
             }
         }
-        await remix.call('editor', 'highlight', pos, 'browser/3_Ballot.sol')
+        await remix.call('editor', 'highlight', pos, 'browser/contracts/3_Ballot.sol')
         
          const pos2 = {
             start: {
@@ -163,7 +168,7 @@ const sourcehighlightScript = {
                 column: 20
             }
         }
-        await remix.call('editor', 'highlight', pos2, 'browser/3_Ballot.sol')
+        await remix.call('editor', 'highlight', pos2, 'browser/contracts/3_Ballot.sol')
         
          const pos3 = {
             start: {
@@ -175,7 +180,7 @@ const sourcehighlightScript = {
                 column: 20
             }
         }
-        await remix.call('editor', 'highlight', pos3, 'browser/3_Ballot.sol')
+        await remix.call('editor', 'highlight', pos3, 'browser/contracts/3_Ballot.sol')
     } catch (e) {
         console.log(e.message)
     }
@@ -187,7 +192,7 @@ const removeSourcehighlightScript = {
   content: `
   (async () => {
     try {
-        await remix.call('editor', 'discardHighlightAt', 32, 'browser/3_Ballot.sol')         
+        await remix.call('editor', 'discardHighlightAt', 32, 'browser/contracts/3_Ballot.sol')         
     } catch (e) {
         console.log(e.message)
     }
