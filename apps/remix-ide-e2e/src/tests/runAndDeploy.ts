@@ -32,9 +32,9 @@ module.exports = {
     .click('*[data-id="remixDRValueLabel"]')
     .execute(function () {
       const elem = document.getElementById('value') as HTMLInputElement
-      return elem.value
+      return elem
     }, [], function (result) {
-      console.log('loging ', result)
+      console.log('loging ', result.value)
       browser.assert.equal(result.value, "0")
     })
     .getValue('#value', function(result) { console.log("res=", result); this.assert.equal(result.value, "0") })
