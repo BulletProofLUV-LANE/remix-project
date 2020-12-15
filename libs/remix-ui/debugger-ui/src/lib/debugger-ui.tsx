@@ -190,10 +190,6 @@ export const DebuggerUI = (props: DebuggerUIProps) => {
     startDebugging(null, txHash, null)
   }
   
-  const deleteHighlights = async () => {
-    await debuggerModule.call('editor', 'discardHighlight')
-  }
-  
   const stepManager = {
     jumpTo: state.debugger && state.debugger.step_manager ? state.debugger.step_manager.jumpTo.bind(state.debugger.step_manager) : null,
     stepOverBack: state.debugger && state.debugger.step_manager ? state.debugger.step_manager.stepOverBack.bind(state.debugger.step_manager) : null,
