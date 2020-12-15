@@ -37,17 +37,32 @@ module.exports = {
       console.log('loging ', result.value)
       browser.assert.equal(result.value, "0")
     })
-    .getValue('#value', function(result) { console.log("res=", result); this.assert.equal(result.value, "0") })
-    .setValue('#value', '0000')
-    .getValue('*[data-id="dandrValue"]', function(result) { this.assert.equal(result.value, "0") })
     .clearValue('#value')
     .setValue('#value', '-44')
-    .getValue('*[data-id="dandrValue"]', function(result) { this.assert.equal(result.value, "0") })
+    .execute(function () {
+      const elem = document.getElementById('value') as HTMLInputElement
+      return elem
+    }, [], function (result) {
+      console.log('loging ', result.value)
+      browser.assert.equal(result.value, "0")
+    })
     .clearValue('#value')
     .setValue('#value', '')
-    .getValue('*[data-id="dandrValue"]', function(result) { this.assert.equal(result.value, "0") })
+    .execute(function () {
+      const elem = document.getElementById('value') as HTMLInputElement
+      return elem
+    }, [], function (result) {
+      console.log('loging ', result.value)
+      browser.assert.equal(result.value, "0")
+    })
     .setValue('#value', 'dragon')
-    .getValue('*[data-id="dandrValue"]', function(result) { this.assert.equal(result.value, "0") })
+    .execute(function () {
+      const elem = document.getElementById('value') as HTMLInputElement
+      return elem
+    }, [], function (result) {
+      console.log('loging ', result.value)
+      browser.assert.equal(result.value, "0")
+    })
   },
 
   'Should sign message using account key': function (browser: NightwatchBrowser) {
