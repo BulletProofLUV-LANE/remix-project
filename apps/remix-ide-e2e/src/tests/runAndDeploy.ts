@@ -35,7 +35,7 @@ module.exports = {
       return elem.value
     }, [], function (result) {
       console.log(result)
-      this.assert.equal(result.value, "0")
+      browser.assert.equal(result.value, "0")
     })
     .getValue('#value', function(result) { console.log("res=", result); this.assert.equal(result.value, "0") })
     .setValue('#value', '0000')
