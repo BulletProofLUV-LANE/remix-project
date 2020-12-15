@@ -1,4 +1,5 @@
 'use strict'
+import { doesNotThrow } from 'assert'
 import { NightwatchBrowser } from "nightwatch"
 import init from '../helpers/init'
 import sauce from './sauce'
@@ -29,6 +30,13 @@ module.exports = {
     .clearValue('#value')
     .setValue('#value', '0000')
     .click('*[data-id="remixDRValueLabel"]')
+    .execute(function () {
+      const elem = document.getElementById('value') as HTMLInputElement
+      return elem.value
+    }, [], function (result) {
+      console.log(result)
+      this.assert.equal(result, "0")
+    })
     .getValue('#value', function(result) { console.log("res=", result); this.assert.equal(result.value, "0") })
     .setValue('#value', '0000')
     .getValue('*[data-id="dandrValue"]', function(result) { this.assert.equal(result.value, "0") })
