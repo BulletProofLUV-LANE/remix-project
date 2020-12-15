@@ -34,7 +34,7 @@ module.exports = {
       const elem = document.getElementById('value') as HTMLInputElement
       return elem.value
     }, [], function (result) {
-      console.log(result)
+      console.log('loging ', result)
       browser.assert.equal(result.value, "0")
     })
     .getValue('#value', function(result) { console.log("res=", result); this.assert.equal(result.value, "0") })
